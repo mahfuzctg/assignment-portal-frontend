@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import submissionService from "@/services/submissionService";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
 import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 const STATUS_COLORS = {
   Pending: "#facc15",
@@ -25,11 +27,11 @@ export default function InstructorSubmissionsPage() {
   const handleUpdate = async (id: string, feedback: string, status: string) => {
     try {
       await submissionService.updateSubmission(id, { feedback, status });
-      toast.success("Updated");
-      const res = await submissionService.getAllSubmissions();
-      setSubmissions(res);
+      toast.success("Submission updated successfully!");
+      const updated = await submissionService.getAllSubmissions();
+      setSubmissions(updated);
     } catch {
-      toast.error("Failed to update");
+      toast.error("Failed to update submission.");
     }
   };
 
@@ -40,47 +42,86 @@ export default function InstructorSubmissionsPage() {
   ];
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">All Student Submissions</h2>
+    <div className="p-6 max-w-6xl mx-auto space-y-10">
+      <h2 className="text-3xl font-semibold text-center">Instructor Submission Dashboard</h2>
 
-      <PieChart width={400} height={300}>
-        <Pie data={pieData} dataKey="value" nameKey="name" outerRadius={100}>
-          {pieData.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={STATUS_COLORS[entry.name as keyof typeof STATUS_COLORS]} />
-          ))}
-        </Pie>
-        <Tooltip />
-        <Legend />
-      </PieChart>
+      <Card className="shadow-md">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">Submission Status Overview</CardTitle>
+        </CardHeader>
+        <CardContent className="h-72">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={pieData}
+                dataKey="value"
+                nameKey="name"
+                outerRadius={100}
+                label
+              >
+                {pieData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={STATUS_COLORS[entry.name as keyof typeof STATUS_COLORS]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend verticalAlign="bottom" />
+            </PieChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
 
-      <div className="mt-8 space-y-6">
-        {submissions.map(sub => (
-          <div key={sub._id} className="border p-4 rounded-md bg-gray-100">
-            <p><strong>Assignment:</strong> {sub.assignmentId?.title}</p>
-            <p><strong>Student:</strong> {sub.studentId?.email}</p>
-            <p><strong>Text:</strong> {sub.submissionText}</p>
-            <p><strong>Status:</strong> {sub.status}</p>
-            <p><strong>Feedback:</strong> {sub.feedback || "N/A"}</p>
+      <div className="space-y-6">
+        {submissions.map((sub) => (
+          <Card key={sub._id} className="bg-white shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-base font-medium text-gray-800">
+                {sub.assignmentId?.title} - {sub.studentId?.email}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                <strong>Submission:</strong> {sub.submissionText}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                <strong>Status:</strong> {sub.status}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                <strong>Feedback:</strong> {sub.feedback || "N/A"}
+              </p>
 
-            <form
-              onSubmit={e => {
-                e.preventDefault();
-                const data = new FormData(e.currentTarget);
-                const status = data.get("status") as string;
-                const feedback = data.get("feedback") as string;
-                handleUpdate(sub._id, feedback, status);
-              }}
-              className="mt-4 space-y-2"
-            >
-              <Input name="feedback" placeholder="Enter feedback..." defaultValue={sub.feedback} />
-              <select name="status" defaultValue={sub.status} className="w-full px-2 py-1 rounded-md border">
-                <option value="Pending">Pending</option>
-                <option value="Accepted">Accepted</option>
-                <option value="Rejected">Rejected</option>
-              </select>
-              <Button type="submit">Update</Button>
-            </form>
-          </div>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  const feedback = formData.get("feedback") as string;
+                  const status = formData.get("status") as string;
+                  handleUpdate(sub._id, feedback, status);
+                }}
+                className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+              >
+                <Input
+                  name="feedback"
+                  placeholder="Enter feedback..."
+                  defaultValue={sub.feedback}
+                />
+                <Select name="status" defaultValue={sub.status}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Pending">Pending</SelectItem>
+                    <SelectItem value="Accepted">Accepted</SelectItem>
+                    <SelectItem value="Rejected">Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="sm:col-span-2">
+                  <Button type="submit" className="w-full">
+                    Update Submission
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         ))}
       </div>
     </div>

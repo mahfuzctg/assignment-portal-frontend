@@ -47,12 +47,7 @@ export default function Sidebar() {
               <Link href="/dashboard/instructor/create" className={cn(linkClass)}>
                 Create Assignment
               </Link>
-              <Link href="/dashboard/instructor/review" className={cn(linkClass)}>
-                Review Submissions
-              </Link>
-              <Link href="/dashboard/instructor/chart" className={cn(linkClass)}>
-                Submission Stats
-              </Link>
+           
             </>
           )}
         </nav>
