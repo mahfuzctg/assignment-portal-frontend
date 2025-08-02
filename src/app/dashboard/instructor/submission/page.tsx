@@ -2,102 +2,87 @@
 
 import { useEffect, useState } from "react";
 import submissionService from "@/services/submissionService";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
+import { toast } from "sonner";
 
-type TSubmission = {
-  _id: string;
-  assignmentId: {
-    _id: string;
-    title: string;
-    description?: string;
-  };
-  submissionText: string;
-  status: "Pending" | "Accepted" | "Rejected";
-  feedback?: string;
-  createdAt: string;
+const STATUS_COLORS = {
+  Pending: "#facc15",
+  Accepted: "#4ade80",
+  Rejected: "#f87171",
 };
 
-export default function StudentSubmissionsPage() {
-  const [submissions, setSubmissions] = useState<TSubmission[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function InstructorSubmissionsPage() {
+  const [submissions, setSubmissions] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchSubmissions = async () => {
-      try {
-        const data = await submissionService.getMySubmissions();
-        setSubmissions(data || []);
-      } catch (error) {
-        console.error("Error fetching submissions:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchSubmissions();
+    submissionService.getAllSubmissions()
+      .then(setSubmissions)
+      .catch(() => toast.error("Failed to load submissions"));
   }, []);
 
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-        {[...Array(3)].map((_, i) => (
-          <Skeleton key={i} className="h-[150px] w-full rounded-xl" />
-        ))}
-      </div>
-    );
-  }
+  const handleUpdate = async (id: string, feedback: string, status: string) => {
+    try {
+      await submissionService.updateSubmission(id, { feedback, status });
+      toast.success("Updated");
+      const res = await submissionService.getAllSubmissions();
+      setSubmissions(res);
+    } catch {
+      toast.error("Failed to update");
+    }
+  };
+
+  const pieData = [
+    { name: "Pending", value: submissions.filter(s => s.status === "Pending").length },
+    { name: "Accepted", value: submissions.filter(s => s.status === "Accepted").length },
+    { name: "Rejected", value: submissions.filter(s => s.status === "Rejected").length },
+  ];
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-semibold mb-4">My Submissions</h2>
-      {submissions.length === 0 ? (
-        <p>No submissions found.</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {submissions.map((submission) => (
-            <Card key={submission._id}>
-              <CardHeader>
-                <CardTitle>{submission.assignmentId?.title || "Untitled Assignment"}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm mb-1">
-                  <strong>Submitted:</strong> {new Date(submission.createdAt).toLocaleDateString()}
-                </p>
-                <p className="text-sm mb-1">
-                  <strong>Submission URL:</strong>{" "}
-                  <a
-                    href={submission.submissionText}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline break-words"
-                  >
-                    {submission.submissionText}
-                  </a>
-                </p>
-                <p className="text-sm mb-1">
-                  <strong>Status:</strong>{" "}
-                  <Badge
-                    variant={
-                      submission.status === "Accepted"
-                        ? "default"
-                        : submission.status === "Rejected"
-                        ? "destructive"
-                        : "outline"
-                    }
-                  >
-                    {submission.status}
-                  </Badge>
-                </p>
-                {submission.feedback && (
-                  <p className="text-sm mt-2">
-                    <strong>Feedback:</strong> {submission.feedback}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+    <div className="p-6 max-w-5xl mx-auto">
+      <h2 className="text-2xl font-bold mb-6">All Student Submissions</h2>
+
+      <PieChart width={400} height={300}>
+        <Pie data={pieData} dataKey="value" nameKey="name" outerRadius={100}>
+          {pieData.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={STATUS_COLORS[entry.name as keyof typeof STATUS_COLORS]} />
           ))}
-        </div>
-      )}
+        </Pie>
+        <Tooltip />
+        <Legend />
+      </PieChart>
+
+      <div className="mt-8 space-y-6">
+        {submissions.map(sub => (
+          <div key={sub._id} className="border p-4 rounded-md bg-gray-100">
+            <p><strong>Assignment:</strong> {sub.assignmentId?.title}</p>
+            <p><strong>Student:</strong> {sub.studentId?.email}</p>
+            <p><strong>Text:</strong> {sub.submissionText}</p>
+            <p><strong>Status:</strong> {sub.status}</p>
+            <p><strong>Feedback:</strong> {sub.feedback || "N/A"}</p>
+
+            <form
+              onSubmit={e => {
+                e.preventDefault();
+                const data = new FormData(e.currentTarget);
+                const status = data.get("status") as string;
+                const feedback = data.get("feedback") as string;
+                handleUpdate(sub._id, feedback, status);
+              }}
+              className="mt-4 space-y-2"
+            >
+              <Input name="feedback" placeholder="Enter feedback..." defaultValue={sub.feedback} />
+              <select name="status" defaultValue={sub.status} className="w-full px-2 py-1 rounded-md border">
+                <option value="Pending">Pending</option>
+                <option value="Accepted">Accepted</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+              <Button type="submit">Update</Button>
+            </form>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
