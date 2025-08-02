@@ -1,4 +1,4 @@
-
+// submissionService.ts
 import axios from "axios";
 import { getSession } from "next-auth/react";
 
@@ -14,24 +14,35 @@ const api = axios.create({
 async function getAuthHeaders() {
   const session = await getSession();
   const token = (session as any)?.accessToken || (session as any)?.user?.accessToken;
-
   if (!token) throw new Error("No auth token found");
-
-  return {
-    Authorization: `Bearer ${token}`,
-  };
+  return { Authorization: `Bearer ${token}` };
 }
 
-// Submit a student assignment
-const submitAssignment = async (payload: {
-  assignmentId: string;
-  submissionText: string;
-}) => {
+const submitAssignment = async (submission: { assignmentId: string; submissionText: string }) => {
   const headers = await getAuthHeaders();
-  const res = await api.post("/submission", payload, { headers });
+
+  const res = await api.post("/submission", submission, {
+    headers,
+    withCredentials: true,
+  });
+
   return res.data.data;
 };
 
+const getMySubmissions = async () => {
+  const headers = await getAuthHeaders();
+
+  const res = await api.get("/submission/mine", {
+    headers,
+    withCredentials: true,
+  });
+
+  return res.data.data;
+};
+
+
+
 export default {
   submitAssignment,
+  getMySubmissions,
 };
