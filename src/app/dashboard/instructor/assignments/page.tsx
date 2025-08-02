@@ -1,92 +1,83 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import assignmentService from "@/services/assignmentService";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export default function InstructorAssignmentsPage() {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [deadline, setDeadline] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [isSuccess, setIsSuccess] = useState(false);
+interface Assignment {
+  _id: string;
+  title: string;
+  description: string;
+  deadline: string;
+}
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage(null);
+export default function StudentAssignmentsPage() {
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    try {
-      await assignmentService.createAssignment({ title, description, deadline });
-      setMessage("Assignment created successfully!");
-      setIsSuccess(true);
-      setTitle("");
-      setDescription("");
-      setDeadline("");
-    } catch (error) {
-      setMessage("Failed to create assignment.");
-      setIsSuccess(false);
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    assignmentService
+      .getAssignments()
+      .then((data) => {
+        setAssignments(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Failed to load assignments");
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading)
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
+        {[...Array(4)].map((_, idx) => (
+          <Card key={idx} className="p-4">
+            <Skeleton className="h-6 w-2/3 mb-2" />
+            <Skeleton className="h-4 w-full mb-2" />
+            <Skeleton className="h-4 w-1/2" />
+          </Card>
+        ))}
+      </div>
+    );
+
+  if (error)
+    return (
+      <p className="text-center py-10 text-red-600 font-semibold">{error}</p>
+    );
+
+  if (assignments.length === 0)
+    return (
+      <p className="text-center py-10 text-muted-foreground">
+        No assignments available
+      </p>
+    );
 
   return (
-    <div className="max-w-2xl mx-auto py-10">
-      <Card>
-        <CardHeader>
-          <CardTitle>Create New Assignment</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {message && (
-            <Alert variant={isSuccess ? "default" : "destructive"} className="mb-4">
-              <AlertDescription>{message}</AlertDescription>
-            </Alert>
-          )}
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-6 text-foreground text-center">
+        Available Assignments
+      </h1>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Input
-                placeholder="Assignment Title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                minLength={3}
-              />
-            </div>
-
-            <div>
-              <Textarea
-                placeholder="Assignment Description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                required
-                minLength={10}
-              />
-            </div>
-
-            <div>
-              <Input
-                type="date"
-                value={deadline}
-                onChange={(e) => setDeadline(e.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <Button type="submit" disabled={loading} className="w-full">
-                {loading ? "Creating..." : "Create Assignment"}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {assignments.map((a) => (
+          <Card key={a._id}>
+            <CardHeader>
+              <CardTitle className="text-lg">{a.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-2">
+                {a.description}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Deadline: {new Date(a.deadline).toLocaleDateString()}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }

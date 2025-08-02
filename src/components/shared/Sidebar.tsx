@@ -27,6 +27,9 @@ export default function Sidebar() {
               <Link href="/dashboard/student/assignments" className={cn(linkClass)}>
                 Assignments
               </Link>
+              <Link href="/dashboard/student/submit" className={cn(linkClass)}>
+                Submit Assignment
+              </Link>
               <Link href="/dashboard/student/submissions" className={cn(linkClass)}>
                 My Submissions
               </Link>
@@ -36,6 +39,9 @@ export default function Sidebar() {
           {role === "instructor" && (
             <>
               <Link href="/dashboard/instructor/assignments" className={cn(linkClass)}>
+               Assignment
+              </Link>
+              <Link href="/dashboard/instructor/create" className={cn(linkClass)}>
                 Create Assignment
               </Link>
               <Link href="/dashboard/instructor/review" className={cn(linkClass)}>
