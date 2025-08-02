@@ -1,0 +1,41 @@
+assignment-portal/
+├── app/
+│   ├── layout.tsx               # Root layout
+│   ├── page.tsx                 # Home / Landing page
+│   ├── dashboard/               # Dashboard for both roles
+│   │   ├── layout.tsx           # Shared dashboard layout (sidebar + navbar)
+│   │   ├── student/             # Student-specific dashboard routes
+│   │   │   ├── assignments/page.tsx
+│   │   │   ├── submissions/page.tsx
+│   │   ├── instructor/          # Instructor-specific dashboard routes
+│   │   │   ├── assignments/page.tsx
+│   │   │   ├── review/page.tsx
+│   │   │   ├── chart/page.tsx
+│   ├── api/                     # API routes for NextAuth etc.
+│   │   ├── auth/[...nextauth]/route.ts
+├── components/
+│   ├── shared/                  # Reusable UI components
+│   │   ├── Navbar.tsx
+│   │   ├── Sidebar.tsx
+│   ├── dashboard/               # Reusable dashboard parts
+│   ├── forms/                   # Forms like create assignment, submit work
+├── context/
+│   ├── AuthContext.tsx
+├── hooks/
+│   ├── useRoleRedirect.ts       # Role-based route redirect
+│   ├── useSubmissionStats.ts    # For chart stats
+├── lib/
+│   ├── auth.ts                  # NextAuth config
+│   ├── axios.ts                  # NextAuth config
+├── service/
+│   ├── assignmentService.ts                  
+├── types/
+│   ├── index.ts                 # Shared types/interfaces
+├── styles/
+│   ├── globals.css
+├── utils/
+│   ├── protectedRoute.tsx       # Higher order component for protection
+├── .env.local
+├── tailwind.config.ts
+├── next.config.js
+├── package.json
