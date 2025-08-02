@@ -2,42 +2,57 @@
 
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+
 
 export default function Navbar() {
   const { data: session, status } = useSession();
 
   return (
-    <nav className="bg-gray-800 text-white p-4 flex justify-between items-center">
+    <nav className="bg-white text-gray-900 shadow px-6 py-4 flex justify-between items-center">
       <Link href="/">
-        <span className="text-lg font-bold cursor-pointer">Assignment Portal</span>
+        <span className="text-xl font-bold cursor-pointer">Assignment Portal</span>
       </Link>
 
       <div className="space-x-4 flex items-center">
-        <Link href="/">Home</Link>
+        <Link href="/">
+          <Button variant="ghost" className="text-sm font-medium">
+            Home
+          </Button>
+        </Link>
 
         {status === "loading" ? (
-          <span>Loading...</span>
+          <span className="text-sm text-gray-500">Loading...</span>
         ) : session?.user ? (
           <>
-            <Link href="/dashboard">Dashboard</Link>
+            <Link href="/dashboard">
+              <Button variant="ghost" className="text-sm font-medium">
+                Dashboard
+              </Button>
+            </Link>
 
-            <span className="ml-4 mr-2">
+            <span className="text-sm">
               Welcome,{" "}
               <span className="font-semibold capitalize">{session.user.name}</span>{" "}
               (<span className="capitalize">{session.user.role}</span>)
             </span>
 
-            <button
+            <Button
+              variant="destructive"
+              size="sm"
               onClick={() => signOut({ callbackUrl: "/auth/login" })}
-              className="bg-red-600 px-3 py-1 rounded hover:bg-red-700 transition"
             >
               Logout
-            </button>
+            </Button>
           </>
         ) : (
           <>
-            <Link href="/auth/login">Login</Link>
-            <Link href="/auth/register">Register</Link>
+            <Link href="/auth/login">
+              <Button variant="outline" size="sm">Login</Button>
+            </Link>
+            <Link href="/auth/register">
+              <Button size="sm">Register</Button>
+            </Link>
           </>
         )}
       </div>
