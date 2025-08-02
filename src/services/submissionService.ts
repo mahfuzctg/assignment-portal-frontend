@@ -41,8 +41,22 @@ const getMySubmissions = async () => {
 };
 
 
+const getAllSubmissions = async () => {
+  const headers = await getAuthHeaders();
+  const res = await api.get("/submission", { headers });
+  return res.data.data;
+};
+
+const updateSubmission = async (id: string, update: { status?: string; feedback?: string }) => {
+  const headers = await getAuthHeaders();
+  const res = await api.patch(`/submission/${id}`, update, { headers });
+  return res.data.data;
+};
+
 
 export default {
   submitAssignment,
   getMySubmissions,
+  getAllSubmissions,
+  updateSubmission
 };
