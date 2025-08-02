@@ -1,4 +1,3 @@
-// submissionService.ts
 import axios from "axios";
 import { getSession } from "next-auth/react";
 
@@ -11,10 +10,21 @@ const api = axios.create({
   },
 });
 
+
+interface CustomSession {
+  accessToken?: string;
+  user?: {
+    accessToken?: string;
+    [key: string]: unknown;
+  };
+}
+
 async function getAuthHeaders() {
-  const session = await getSession();
-  const token = (session as any)?.accessToken || (session as any)?.user?.accessToken;
+  const session = (await getSession()) as CustomSession;
+
+  const token = session?.accessToken || session?.user?.accessToken;
   if (!token) throw new Error("No auth token found");
+
   return { Authorization: `Bearer ${token}` };
 }
 
@@ -40,7 +50,6 @@ const getMySubmissions = async () => {
   return res.data.data;
 };
 
-
 const getAllSubmissions = async () => {
   const headers = await getAuthHeaders();
   const res = await api.get("/submission", { headers });
@@ -53,10 +62,9 @@ const updateSubmission = async (id: string, update: { status?: string; feedback?
   return res.data.data;
 };
 
-
 export default {
   submitAssignment,
   getMySubmissions,
   getAllSubmissions,
-  updateSubmission
+  updateSubmission,
 };

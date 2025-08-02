@@ -1,7 +1,8 @@
 import "./globals.css";
 import { ReactNode } from "react";
-import { getServerSession } from "next-auth";
+import { getServerSession } from "next-auth/next";
 import SessionProviderWrapper from "@/app/providers/SessionProviderWrapper";
+
 import { authOptions } from "@/components/lib/auth";
 
 
