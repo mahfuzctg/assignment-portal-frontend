@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import assignmentService from "@/services/assignmentService";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Assignment {
   _id: string;
@@ -28,7 +30,18 @@ export default function StudentAssignmentsPage() {
       });
   }, []);
 
-  if (loading) return <p className="text-center py-10">Loading assignments...</p>;
+  if (loading)
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
+        {[...Array(4)].map((_, idx) => (
+          <Card key={idx} className="p-4">
+            <Skeleton className="h-6 w-2/3 mb-2" />
+            <Skeleton className="h-4 w-full mb-2" />
+            <Skeleton className="h-4 w-1/2" />
+          </Card>
+        ))}
+      </div>
+    );
 
   if (error)
     return (
@@ -37,30 +50,34 @@ export default function StudentAssignmentsPage() {
 
   if (assignments.length === 0)
     return (
-      <p className="text-center py-10 text-gray-600">No assignments available</p>
+      <p className="text-center py-10 text-muted-foreground">
+        No assignments available
+      </p>
     );
 
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100">
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-6 text-foreground text-center">
         Available Assignments
       </h1>
-      <ul className="space-y-6">
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {assignments.map((a) => (
-          <li
-            key={a._id}
-            className="p-6 border rounded-lg shadow-sm bg-white dark:bg-gray-800"
-          >
-            <h2 className="font-semibold text-xl mb-2 text-gray-800 dark:text-gray-200">
-              {a.title}
-            </h2>
-            <p className="mb-3 text-gray-700 dark:text-gray-300">{a.description}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Deadline: {new Date(a.deadline).toLocaleDateString()}
-            </p>
-          </li>
+          <Card key={a._id}>
+            <CardHeader>
+              <CardTitle className="text-lg">{a.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-2">
+                {a.description}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Deadline: {new Date(a.deadline).toLocaleDateString()}
+              </p>
+            </CardContent>
+          </Card>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }

@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 import assignmentService from "@/services/assignmentService";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function InstructorAssignmentsPage() {
   const [title, setTitle] = useState("");
@@ -9,6 +14,7 @@ export default function InstructorAssignmentsPage() {
   const [deadline, setDeadline] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,68 +24,69 @@ export default function InstructorAssignmentsPage() {
     try {
       await assignmentService.createAssignment({ title, description, deadline });
       setMessage("Assignment created successfully!");
+      setIsSuccess(true);
       setTitle("");
       setDescription("");
       setDeadline("");
     } catch (error) {
       setMessage("Failed to create assignment.");
+      setIsSuccess(false);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-lg mx-auto bg-white text-gray-800 p-8 rounded-md shadow-md">
-      <h1 className="text-2xl font-bold mb-6 border-b border-gray-300 pb-2">
-        Create Assignment
-      </h1>
+    <div className="max-w-2xl mx-auto py-10">
+      <Card>
+        <CardHeader>
+          <CardTitle>Create New Assignment</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {message && (
+            <Alert variant={isSuccess ? "default" : "destructive"} className="mb-4">
+              <AlertDescription>{message}</AlertDescription>
+            </Alert>
+          )}
 
-      {message && (
-        <p
-          className={`mb-4 px-3 py-2 rounded ${
-            message.includes("success") ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-          }`}
-        >
-          {message}
-        </p>
-      )}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Input
+                placeholder="Assignment Title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+                minLength={3}
+              />
+            </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col space-y-5">
-        <input
-          type="text"
-          placeholder="Title"
-          className="border border-gray-300 p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-          minLength={3}
-        />
+            <div>
+              <Textarea
+                placeholder="Assignment Description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                required
+                minLength={10}
+              />
+            </div>
 
-        <textarea
-          placeholder="Description"
-          className="border border-gray-300 p-3 rounded h-28 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-          minLength={10}
-        />
+            <div>
+              <Input
+                type="date"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+                required
+              />
+            </div>
 
-        <input
-          type="date"
-          className="border border-gray-300 p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={deadline}
-          onChange={(e) => setDeadline(e.target.value)}
-          required
-        />
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-blue-600 text-white py-3 rounded disabled:bg-gray-400 transition-colors duration-200"
-        >
-          {loading ? "Creating..." : "Create Assignment"}
-        </button>
-      </form>
+            <div>
+              <Button type="submit" disabled={loading} className="w-full">
+                {loading ? "Creating..." : "Create Assignment"}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

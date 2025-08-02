@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const linkClass =
-  "block px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-primary hover:bg-muted transition";
+  "block px-4 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-primary hover:bg-muted transition";
 
 export default function Sidebar() {
   const { data: session } = useSession();
@@ -17,7 +17,7 @@ export default function Sidebar() {
   const { role, name } = user;
 
   return (
-    <aside className="w-64 bg-background border-r min-h-screen p-6 flex flex-col justify-between">
+    <aside className="fixed top-0 left-0 z-50 w-64 h-screen bg-background border-r p-6 flex flex-col justify-between">
       <div>
         <h2 className="text-xl font-semibold text-foreground mb-6">Dashboard</h2>
 
