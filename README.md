@@ -77,6 +77,15 @@ yarn install
 
 ```
 
+## 🔐 Test Credentials
+
+Use these credentials to log in and test the app functionality:
+
+| Role       | Email                | Password     |
+|------------|----------------------|--------------|
+| Instructor | abdullah@ins.com | instructor1234  |
+| Student    | mahfuz@std1.com    | student1234  |
+
 
 
 
