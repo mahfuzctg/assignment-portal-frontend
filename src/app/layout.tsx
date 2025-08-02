@@ -2,7 +2,6 @@ import "./globals.css";
 import { ReactNode } from "react";
 import { getServerSession } from "next-auth";
 import SessionProviderWrapper from "@/app/providers/SessionProviderWrapper";
-import Navbar from "@/components/shared/Navbar";
 import { authOptions } from "@/components/lib/auth";
 
 
@@ -26,7 +25,7 @@ export default async function RootLayout({
         <SessionProviderWrapper>
           {isLoggedIn ? (
             <>
-              <Navbar />
+           
               <main className="max-w-7xl mx-auto p-4">{children}</main>
             </>
           ) : (

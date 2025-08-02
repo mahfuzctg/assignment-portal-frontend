@@ -27,7 +27,14 @@ export default function LoginPage() {
     });
 
     if (res?.ok) {
-      router.push("/");
+      // Fetch the session to get the user role
+      const { getSession } = await import("next-auth/react");
+      const session = await getSession();
+      if (session?.user?.role) {
+        router.push(`/dashboard/${session.user.role}/assignments`);
+      } else {
+        router.push("/dashboard");
+      }
     } else {
       setError("Invalid email or password");
     }
